@@ -1,0 +1,7 @@
+package wwwirc;
+
+message Login {
+	required string username;
+	required string password;
+	optional bool newUser = false;
+}
