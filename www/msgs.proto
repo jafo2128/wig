@@ -1,0 +1,34 @@
+package main;
+
+message Command {
+	required int32 id = 1;
+	optional ConnectCommand connectCommand = 2;
+	optional ServerMessage serverMessage = 3;
+	optional StatusMessage statusMessage = 4;
+}
+
+message ConnectCommand {
+	required string sessionid = 2;
+	required string server = 3;
+	required uint32 port = 4;
+	required string nick = 5;
+	required string realname = 6;
+	optional bool ssl = 7;
+}
+
+message ServerMessage {
+	required string server = 1;
+	required string msg = 2;
+}
+
+message StatusMessage {
+	required string msg = 1;
+	required int32 msgtype = 2;
+	optional int32 statuscode = 3;
+}
+
+message Login {
+	required string username = 1;
+	required string password = 2;
+	optional bool newUser = 3;
+}

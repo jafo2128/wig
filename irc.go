@@ -5,11 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	irc "github.com/fluffle/goirc/client"
 	"github.com/gorilla/websocket"
+	"github.com/golang/protobuf/proto"
 )
-
-/*"github.com/golang/protobuf/proto"*/
 
 const (
 	PongWait = 60 * time.Second
@@ -17,11 +15,57 @@ const (
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(*http.Request) bool { return true },
+	
 }
 
 type Client struct {
-	conn *irc.Conn
+	cons map[string]*IrcClient
 	ws   *websocket.Conn
+}
+
+func (c *Client) HandleCommand(cmd *Command) {
+	switch(*cmd.Id) {
+		case 0: {
+			
+			break
+		}
+		case 1: {
+			srv := *cmd.ConnectCommand.Server
+			if c.cons[srv] == nil {
+				cfg := &IrcConfig {
+					server: srv,
+					ssl: *cmd.ConnectCommand.Ssl,
+					port: int(*cmd.ConnectCommand.Port),
+				}
+				
+				nc := NewIrcClient(cfg)
+				nc.Run(c)
+				
+				c.cons[srv] = nc
+			}
+			break 
+		}
+		default: {
+			msgtype := int32(0)
+			rspm := fmt.Sprintf("Unknown command type: %v", cmd.Id)
+			fmt.Println(rspm, cmd.Id)
+			rsp := &Command{
+				Id: cmd.Id,
+				StatusMessage: &StatusMessage {
+					Msg: &rspm,
+					Msgtype: &msgtype,
+				},
+			}
+			c.SendMessage(rsp)
+		}
+	}
+}
+
+func (c *Client) SendMessage(cmd *Command){
+	msg, pe := proto.Marshal(cmd)
+	if pe == nil {
+		c.ws.WriteMessage(websocket.BinaryMessage, msg)
+	}
 }
 
 func (c *Client) RunWS(ws *websocket.Conn) {
@@ -38,6 +82,16 @@ func (c *Client) RunWS(ws *websocket.Conn) {
 						fmt.Println(string(message))
 						break
 					}
+				case websocket.BinaryMessage:
+					{
+						cmd := new(Command)
+						ume := proto.Unmarshal(message, cmd)
+						if ume == nil{
+							fmt.Println("Got msg: ", cmd)
+							c.HandleCommand(cmd)
+						}
+						break
+					}
 				}
 			} else {
 				fmt.Println(err.Error())
@@ -48,9 +102,13 @@ func (c *Client) RunWS(ws *websocket.Conn) {
 }
 
 func NewClient(w http.ResponseWriter, r *http.Request) {
-	c, err := upgrader.Upgrade(w, r, nil)
+	w.Header().Set("Sec-Websocket-Protocol", "irc")
+	c, err := upgrader.Upgrade(w, r, w.Header())
 	if err == nil {
-		nc := &Client{}
+		nc := &Client{
+			cons: make(map[string]*IrcClient, 2),
+		}
+
 		nc.RunWS(c)
 	} else {
 		fmt.Println(err.Error())

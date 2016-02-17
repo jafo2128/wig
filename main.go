@@ -43,10 +43,10 @@ func main() {
 		tcp, err := net.Listen("tcp", _settings.FcgiAddress)
 		if err == nil {
 			defer tcp.Close()
-			fmt.Println("FCGI port started on: ", tcp.Addr())
 			fcgi.Serve(tcp, server)
 		} else {
 			fmt.Errorf(err.Error())
+			os.Exit(10)
 		}
 	}()
 	go func() {
@@ -55,8 +55,11 @@ func main() {
 		hter := http.ListenAndServe(_settings.WsAddress, nil)
 		if hter != nil {
 			fmt.Errorf(hter.Error())
+			os.Exit(11)
 		}
 	}()
-
+	
+	fmt.Println("FCGI port started on:", _settings.FcgiAddress)
+	fmt.Println("WS port started on:", _settings.WsAddress)
 	<-sigchan
 }
