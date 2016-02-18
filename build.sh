@@ -1,6 +1,5 @@
 #!/bin/bash
 
-mkdir .gopath
 mkdir build
 
 cd build
