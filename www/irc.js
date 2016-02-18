@@ -41,6 +41,8 @@ IRC.prototype.OnMessage = function(evt) {
 					if(msg.statusMessage.statuscode == 1){
 						this.Nick(msg.statusMessage.msg, "testwig")
 						this.User(msg.statusMessage.msg, "testwig", "testwig")
+					}else if (msg.statusMessage.statuscode == 2){
+						
 					}
 					break
 				}
