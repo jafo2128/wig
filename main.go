@@ -20,6 +20,7 @@ const (
 )
 
 var _settings = LoadSettings()
+var _clients = make(map[string]*WSClient)
 
 type Server struct {
 }
@@ -27,6 +28,7 @@ type Server struct {
 func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Upgrade") == "websocket" {
 		fmt.Printf("New client: %s\n", r.RemoteAddr)
+		//initial clients are non tracking until login message is validated and a session token is assigned
 		NewClient(w, r)
 	} else {
 		body := "Hello World\n"
@@ -79,7 +81,7 @@ func main() {
 							pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
 							keyOut.Close()
 
-							fmt.Printf("***** ATTENTION *****\n\tA certificate was generated automatically, please visit https://%s before opening site.\n***** ATTENTION *****\n\n", addr)
+							fmt.Printf("***** ATTENTION *****\n\tA certificate was generated automatically for %s.\n***** ATTENTION *****\n\n", _settings.WsHost)
 						} else {
 							fmt.Println("Failed to write key:", koer)
 							os.Exit(99)
@@ -104,6 +106,7 @@ func main() {
 
 	server := Server{}
 	go func() {
+		http.Handle("/", http.FileServer(http.Dir("www")))
 		http.HandleFunc("/ws", server.ServeHTTP)
 		hter := http.ListenAndServeTLS(addr, _settings.SslCert, _settings.SslKey, nil)
 		if hter != nil {
@@ -112,6 +115,6 @@ func main() {
 		}
 	}()
 
-	fmt.Println("WS port started on:", addr)
+	fmt.Println("Wig started on:", addr)
 	<-sigchan
 }

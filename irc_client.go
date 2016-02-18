@@ -14,7 +14,7 @@ type IrcConfig struct {
 }
 
 type IrcClient struct {
-	cli      *Client
+	cli      *WSClient
 	config   *IrcConfig
 	conn     *net.Conn
 	conn_tls *tls.Conn
@@ -95,11 +95,12 @@ func (i *IrcClient) Close() {
 	defer i.cli.RemoveClient(i)
 	if i.config.ssl {
 		i.conn_tls.Close()
-
+	} else {
+		(*i.conn).Close()
 	}
 }
 
-func NewIrcClient(cli *Client, cfg *IrcConfig) *IrcClient {
+func NewIrcClient(cli *WSClient, cfg *IrcConfig) *IrcClient {
 	return &IrcClient{
 		cli:    cli,
 		config: cfg,
