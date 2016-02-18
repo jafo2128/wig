@@ -16,7 +16,7 @@ All commands are serialized with ProtoBuf [msgs.proto](https://github.com/v0l/wi
 | msgtype | direction | statuscode | comment |
 |---------|-----------|------------|---------|
 | 0       | Both      |            | Error |
-| 1       |           |            | |
+| 1       | Client    |            | Login Error |
 | 2       |           |            | |
 | 3       | Client    | 1          | Connected to server |
 |         |           | 2          | Disconnected from server |

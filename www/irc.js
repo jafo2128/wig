@@ -11,8 +11,15 @@ function IRC() { }
 
 IRC.prototype.Proto = {}
 
-IRC.prototype.ParseLine= function(line){
-	
+IRC.prototype.ParseLine= function(server, line){
+	if(line.indexOf("PING") === 0){
+		//auto repond with pong
+		this.SendMessage(server, line.replace("PING", "PONG"))
+	}else{
+		var ls = line.split(" ", 3)
+		console.log(ls)
+		this.OnPrivmsg(server,line.substring(0, line.length-1))
+	}
 }
 
 IRC.prototype.OnOpen = function(evt) {
@@ -32,7 +39,8 @@ IRC.prototype.OnMessage = function(evt) {
 	
 	switch(msg.id){
 		case 2: {
-			this.OnPrivmsg(msg.serverMessage.server, msg.serverMessage.msg)
+			this.ParseLine(msg.serverMessage.server, msg.serverMessage.msg)
+			//this.OnPrivmsg(msg.serverMessage.server, msg.serverMessage.msg)
 			break
 		}
 		case 3: {
@@ -53,11 +61,11 @@ IRC.prototype.OnMessage = function(evt) {
 }
 
 IRC.prototype.OnError = function(evt) {
-	
+	console.log(evt)
 }
 
 IRC.prototype.OnClose = function(evt) {
-	
+	console.log(evt)
 }
 
 IRC.prototype.Connect = function() {
@@ -83,7 +91,11 @@ IRC.prototype.Chat = function() {
 	var server = "0x.tf"
 	var dv = document.querySelector("#ch")
 
-	var msg = new this.Proto.Command({id: 2, serverMessage: {server: server, msg: dv.value + "\n"}})
+	this.SendMessage(server, dv.value + "\n")
+}
+
+IRC.prototype.SendMessage = function(server, msg){
+	var msg = new this.Proto.Command({id: 2, serverMessage: {server: server, msg: msg}})
 	this.ws.send(msg.toArrayBuffer())
 }
 

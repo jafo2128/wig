@@ -11,7 +11,14 @@ html, body {
 }
 
 #chat {
-	margin-bottom:25px;
+    margin-bottom: 25px;
+    background-color: #aaa;
+    overflow-y: auto;
+    position: fixed;
+    bottom: 0;
+    top: 0;
+    left: 200px;
+    right: 0;
 }
 
 #chatInput {
@@ -24,4 +31,16 @@ html, body {
 
 #chatInput #ch {
 	width: 400px;
+}
+
+#serverlist {
+	position: fixed;
+	width: 200px;
+	top: 0;
+	bottom:0;
+	left: 0;
+	overflow-y:auto;
+	height: auto;
+	margin-bottom: 25px;
+	background-color: #eee;
 }
