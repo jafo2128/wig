@@ -1,5 +1,6 @@
 #!/bin/bash
 
+pwd
 mkdir build
 
 cd build
@@ -12,7 +13,8 @@ cd protobuf-2.6.1
 make -j4
 cd ..
 
-./protobuf-2.6.1/src/protoc --go_out=../ ../*.proto
+pwd
+./protobuf-2.6.1/src/protoc --go_out=.. --proto_path=.. ../*.proto
 go build ../
 cp -f ../msgs.proto ../www/
 
