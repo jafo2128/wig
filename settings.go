@@ -6,10 +6,14 @@ import (
 )
 
 type Settings struct {
-	WsAddress string `json:wsAddr`
+	WsHost      string `json:host`
+	WsPort      int    `json:port`
+	SslCert     string `json:sslcert`
+	SslKey      string `json:sslkey`
+	AutoGenCert bool   `json:autogencert`
 }
 
-var _cfg_file = "options.conf"
+var _cfg_file = "options.json"
 
 func LoadSettings() *Settings {
 	ret := &Settings{}
@@ -21,9 +25,13 @@ func LoadSettings() *Settings {
 		}
 	} else {
 		ret = &Settings{
-			WsAddress: ":9002",
+			WsHost:      "localhost",
+			WsPort:      9002,
+			AutoGenCert: true,
+			SslCert:     "cert.crt",
+			SslKey:      "cert.key",
 		}
-		js, jer := json.Marshal(ret)
+		js, jer := json.MarshalIndent(ret, "\t", "")
 		if jer == nil {
 			ioutil.WriteFile(_cfg_file, js, 0644)
 		}

@@ -90,7 +90,7 @@ IRC.prototype.Init = function(){
 	this.builder = ProtoBuf.loadProtoFile("msgs.proto")
 	this.Proto.Command = this.builder.build("main.Command")
 	
-	this.ws = new WebSocket("ws://" + (window.location.host != "" ? window.location.host : "localhost") + ":9002/ws", "irc")
+	this.ws = new WebSocket("wss://" + (window.location.host != "" ? window.location.host : "localhost") + ":9002/ws", "irc")
 	this.ws.binaryType = 'arraybuffer';
 	this.ws.onopen = function(evt) { self.OnOpen(evt) }
 	this.ws.onmessage = function(evt) { self.OnMessage(evt) }

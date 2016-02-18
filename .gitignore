@@ -1,5 +1,6 @@
-options.conf
+*.json
 *.exe
 *.pb.go
 wig
 build
+cert.*
