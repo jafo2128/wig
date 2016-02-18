@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"net/http"
-	"net/http/fcgi"
 	"os"
 	"os/signal"
 	"syscall"
@@ -40,17 +38,6 @@ func main() {
 
 	server := Server{}
 	go func() {
-		tcp, err := net.Listen("tcp", _settings.FcgiAddress)
-		if err == nil {
-			defer tcp.Close()
-			fcgi.Serve(tcp, server)
-		} else {
-			fmt.Errorf(err.Error())
-			os.Exit(10)
-		}
-	}()
-	go func() {
-		//have to spin up another port just for websockets since fcgi doesnt implement http.Hijacker
 		http.HandleFunc("/ws", server.ServeHTTP)
 		hter := http.ListenAndServe(_settings.WsAddress, nil)
 		if hter != nil {
@@ -58,8 +45,7 @@ func main() {
 			os.Exit(11)
 		}
 	}()
-	
-	fmt.Println("FCGI port started on:", _settings.FcgiAddress)
+
 	fmt.Println("WS port started on:", _settings.WsAddress)
 	<-sigchan
 }

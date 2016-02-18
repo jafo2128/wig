@@ -1,16 +1,28 @@
-## Wig (go-web-irc)
+## Wig (web-irc-go)
 
-A very simple self hostable FCGI irc client. 
+A very simple self hostable irc client built with websockets and ProtoBuf.
 
-#### Setup 
+Most of the implementation is done in JS the go server only passes messages over and back and handles logins.
 
-Protoc: https://developers.google.com/protocol-buffers/docs/downloads
+### Setup 
+
+ProtoC: [download](https://developers.google.com/protocol-buffers/docs/downloads)
 
 ```
-go get -u github.com/golang/protobuf/protoc-gen-go
+go get github.com/golang/protobuf/protoc-gen-go
+go get github.com/golang/protobuf/proto
+go get github.com/gorilla/websocket
+```
+
+```
 git clone https://github.com/v0l/wig.git
 cd wig
 protoc --go_out=. .\proto\*.proto
 go build
 ./wig
 ```
+
+### Troubleshooting
+
+ * ```--go_out: protoc-gen-go: The system cannot find the file specified.```
+   * Make sure ```%GOPATH%\bin``` is added to your path (or copy ```%GOPATH%\bin\protoc-gen-go``` to your path)

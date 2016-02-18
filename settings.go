@@ -6,8 +6,7 @@ import (
 )
 
 type Settings struct {
-	FcgiAddress string `json:fcgiAddr`
-	WsAddress   string `json:wsAddr`
+	WsAddress string `json:wsAddr`
 }
 
 var _cfg_file = "options.conf"
@@ -22,8 +21,7 @@ func LoadSettings() *Settings {
 		}
 	} else {
 		ret = &Settings{
-			FcgiAddress: ":9001",
-			WsAddress:   ":9002",
+			WsAddress: ":9002",
 		}
 		js, jer := json.Marshal(ret)
 		if jer == nil {
