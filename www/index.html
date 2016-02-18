@@ -12,14 +12,20 @@
 	</head>
 
 	<body>
+		<script src="irc.js">.
+			var _irc		
+		</script>
+
 		<div id="chat"></div>
-		<script src="irc.js"></script>
+		<div id="chatInput">
+			<input type="text" id="ch"/>
+			<input type="button" onclick="_irc.Chat()" value="Send"/>
+		<div>
 		<script>
 			document.addEventListener("DOMContentLoaded", function(){
-				var _irc = new IRC()
+				_irc = new IRC()
 				_irc.Init();
 			});
 		</script>
-		
 	</body>
 </html>

@@ -1,73 +1,107 @@
-package main;
+package main
 
 import (
-	"net"
-	"fmt"
 	"bufio"
 	"crypto/tls"
+	"fmt"
+	"net"
 )
 
 type IrcConfig struct {
 	server string
-	port int
-	ssl bool
+	port   int
+	ssl    bool
 }
 
 type IrcClient struct {
-	config *IrcConfig
-	conn *net.Conn
+	cli      *Client
+	config   *IrcConfig
+	conn     *net.Conn
 	conn_tls *tls.Conn
-	
+
 	io *bufio.ReadWriter
 }
 
-func (i *IrcClient) Run(cli *Client){
+func (i *IrcClient) Run() {
 	fmt.Println("Starting new irc connection to:", i.config.server)
 	if i.config.ssl {
-		tc := &tls.Config { InsecureSkipVerify: true, }
+		tc := &tls.Config{InsecureSkipVerify: true}
 		nc, er := tls.Dial("tcp", fmt.Sprintf("%v:%v", i.config.server, i.config.port), tc)
 		if er == nil {
 			i.conn_tls = nc
-			
+
 			stid := int32(3)
+			stc := int32(1)
 			fwm := &Command{
-				Id: &cmdid,
-				StatusMessage: &StatusMessage {
-					Server: &i.config.server,
-					Msg: &s,
+				Id: &stid,
+				StatusMessage: &StatusMessage{
+					Statuscode: &stc,
+					Msgtype:    &stid,
+					Msg:        &i.config.server,
 				},
 			}
-			cli.SendMessage(fwm)
-						
+			i.cli.SendMessage(fwm)
+
 			i.io = bufio.NewReadWriter(bufio.NewReader(i.conn_tls), bufio.NewWriter(i.conn_tls))
 			go func() {
-				defer i.conn_tls.Close()
+				defer i.Close()
 				cmdid := int32(2)
 				for {
 					s, rer := i.io.ReadString('\n')
 					if rer == nil {
 						fwm := &Command{
 							Id: &cmdid,
-							ServerMessage: &ServerMessage {
+							ServerMessage: &ServerMessage{
 								Server: &i.config.server,
-								Msg: &s,
+								Msg:    &s,
 							},
 						}
-						cli.SendMessage(fwm)
-					}else{
+						i.cli.SendMessage(fwm)
+					} else {
 						fmt.Println("Read error:", rer.Error())
+						stid := int32(3)
+						stc := int32(2)
+						fwm := &Command{
+							Id: &stid,
+							StatusMessage: &StatusMessage{
+								Statuscode: &stc,
+								Msgtype:    &stid,
+								Msg:        &i.config.server,
+							},
+						}
+						i.cli.SendMessage(fwm)
 						break
 					}
 				}
 			}()
-		}else{
+		} else {
 			fmt.Println("Connect error:", er.Error())
 		}
 	}
 }
 
-func NewIrcClient(cfg *IrcConfig) *IrcClient {
+func (i *IrcClient) SendMessage(msg string) {
+	if i.config.ssl {
+		_, wer := i.conn_tls.Write([]byte(msg))
+		if wer == nil {
+
+		} else {
+
+		}
+	}
+}
+
+func (i *IrcClient) Close() {
+	defer i.cli.RemoveClient(i)
+	if i.config.ssl {
+		i.conn_tls.Close()
+
+	}
+}
+
+func NewIrcClient(cli *Client, cfg *IrcConfig) *IrcClient {
 	return &IrcClient{
+		cli:    cli,
 		config: cfg,
 	}
 }

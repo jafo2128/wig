@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/golang/protobuf/proto"
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -15,7 +15,6 @@ const (
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(*http.Request) bool { return true },
-	
 }
 
 type Client struct {
@@ -24,35 +23,46 @@ type Client struct {
 }
 
 func (c *Client) HandleCommand(cmd *Command) {
-	switch(*cmd.Id) {
-		case 0: {
-			
+	switch *cmd.Id {
+	case 0:
+		{
+
 			break
 		}
-		case 1: {
+	case 1:
+		{
 			srv := *cmd.ConnectCommand.Server
 			if c.cons[srv] == nil {
-				cfg := &IrcConfig {
+				cfg := &IrcConfig{
 					server: srv,
-					ssl: *cmd.ConnectCommand.Ssl,
-					port: int(*cmd.ConnectCommand.Port),
+					ssl:    *cmd.ConnectCommand.Ssl,
+					port:   int(*cmd.ConnectCommand.Port),
 				}
-				
-				nc := NewIrcClient(cfg)
-				nc.Run(c)
-				
+
+				nc := NewIrcClient(c, cfg)
+				nc.Run()
+
 				c.cons[srv] = nc
 			}
-			break 
+			break
 		}
-		default: {
+	case 2:
+		{
+			srv := *cmd.ServerMessage.Server
+			if c.cons[srv] != nil {
+				c.cons[srv].SendMessage(*cmd.ServerMessage.Msg)
+			}
+			break
+		}
+	default:
+		{
+			stid := int32(3)
 			msgtype := int32(0)
-			rspm := fmt.Sprintf("Unknown command type: %v", cmd.Id)
-			fmt.Println(rspm, cmd.Id)
+			rspm := fmt.Sprintf("Unknown command type: %v", *cmd.Id)
 			rsp := &Command{
-				Id: cmd.Id,
-				StatusMessage: &StatusMessage {
-					Msg: &rspm,
+				Id: &stid,
+				StatusMessage: &StatusMessage{
+					Msg:     &rspm,
 					Msgtype: &msgtype,
 				},
 			}
@@ -61,7 +71,14 @@ func (c *Client) HandleCommand(cmd *Command) {
 	}
 }
 
-func (c *Client) SendMessage(cmd *Command){
+func (c *Client) RemoveClient(i *IrcClient) {
+	srv := i.config.server
+	if c.cons[srv] != nil {
+		delete(c.cons, srv)
+	}
+}
+
+func (c *Client) SendMessage(cmd *Command) {
 	msg, pe := proto.Marshal(cmd)
 	if pe == nil {
 		c.ws.WriteMessage(websocket.BinaryMessage, msg)
@@ -86,7 +103,7 @@ func (c *Client) RunWS(ws *websocket.Conn) {
 					{
 						cmd := new(Command)
 						ume := proto.Unmarshal(message, cmd)
-						if ume == nil{
+						if ume == nil {
 							fmt.Println("Got msg: ", cmd)
 							c.HandleCommand(cmd)
 						}

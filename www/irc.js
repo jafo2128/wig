@@ -8,10 +8,22 @@ var ProtoBuf = dcodeIO.ProtoBuf
 var ByteBuffer = dcodeIO.ByteBuffer
 
 function IRC() { }
+
 IRC.prototype.Proto = {}
+
+IRC.prototype.ParseLine= function(line){
+	
+}
 
 IRC.prototype.OnOpen = function(evt) {
 	this.Connect()
+}
+
+IRC.prototype.OnPrivmsg = function(server, msg){
+	var d = document.querySelector("#chat")
+	var nc = document.createElement("div")
+	nc.innerHTML = msg
+	d.appendChild(nc)
 }
 
 IRC.prototype.OnMessage = function(evt) {
@@ -20,10 +32,21 @@ IRC.prototype.OnMessage = function(evt) {
 	
 	switch(msg.id){
 		case 2: {
-			
+			this.OnPrivmsg(msg.serverMessage.server, msg.serverMessage.msg)
 			break
 		}
-		
+		case 3: {
+			switch(msg.statusMessage.msgtype){
+				case 3: {
+					if(msg.statusMessage.statuscode == 1){
+						this.Nick(msg.statusMessage.msg, "testwig")
+						this.User(msg.statusMessage.msg, "testwig", "testwig")
+					}
+					break
+				}
+			}
+			break
+		}
 	}
 }
 
@@ -39,9 +62,26 @@ IRC.prototype.Connect = function() {
 	var server = "0x.tf"
 	var port = 6667
 	var ssl = true
-	var nick = "testwig"
 	
-	var msg = new this.Proto.Command({id: 1, connectCommand: {sessionid: "", server: server, port: port, ssl: ssl, nick: nick, realname: nick}})
+	var msg = new this.Proto.Command({id: 1, connectCommand: {sessionid: "", server: server, port: port, ssl: ssl}})
+	this.ws.send(msg.toArrayBuffer())
+}
+
+IRC.prototype.Nick = function(server, user){
+	var msg = new this.Proto.Command({id: 2, serverMessage: {server: server, msg: "NICK " + user + "\n"}})
+	this.ws.send(msg.toArrayBuffer())
+}
+
+IRC.prototype.User = function(server, nick, realname){
+	var msg = new this.Proto.Command({id: 2, serverMessage: {server: server, msg: "USER " + nick + " 0 * :" + realname + "\n"}})
+	this.ws.send(msg.toArrayBuffer())
+}
+
+IRC.prototype.Chat = function() {
+	var server = "0x.tf"
+	var dv = document.querySelector("#ch")
+
+	var msg = new this.Proto.Command({id: 2, serverMessage: {server: server, msg: dv.value + "\n"}})
 	this.ws.send(msg.toArrayBuffer())
 }
 
