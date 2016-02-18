@@ -1,4 +1,5 @@
-## Wig (web-irc-go)
+## Wig (web-irc-go) 
+![build](https://travis-ci.org/v0l/wig.svg?branch=master)
 
 A very simple self hostable irc client built with websockets and ProtoBuf.
 
