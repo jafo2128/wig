@@ -17,8 +17,7 @@ go get github.com/gorilla/websocket
 ```
 git clone https://github.com/v0l/wig.git
 cd wig
-protoc --go_out=. .\proto\*.proto
-go build
+./build
 ./wig
 ```
 

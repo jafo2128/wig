@@ -1,0 +1,11 @@
+language: go
+
+go:
+  - tip
+
+install:
+ - go get github.com/golang/protobuf/protoc-gen-go
+ - go get github.com/golang/protobuf/proto
+ - go get github.com/gorilla/websocket
+
+script: build.sh

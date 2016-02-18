@@ -2,3 +2,4 @@ options.conf
 *.exe
 *.pb.go
 wig
+build
