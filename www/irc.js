@@ -3,7 +3,6 @@
  * 2016-02-17
 */
 
-//define protobuf & bytebuffer
 var ProtoBuf = dcodeIO.ProtoBuf
 var ByteBuffer = dcodeIO.ByteBuffer
 
@@ -108,16 +107,12 @@ function IRC() { }
 
 IRC.prototype.Proto = {}
 
-IRC.prototype.DecodeLine = function(s) {
-	return new Line(s)
-}
-
 IRC.prototype.ParseLine= function(server, line) {
 	if(line.indexOf("PING") === 0){
 		//auto repond with pong
 		this.SendMessage(server, line.replace("PING", "PONG"))
 	}else{
-		var ls = this.DecodeLine(line)
+		var ls = new Line(line)
 		console.log(ls)
 		this.OnPrivmsg(server,line.substring(0, line.length-1))
 	}
@@ -211,6 +206,4 @@ IRC.prototype.Init = function(){
 	this.ws.onmessage = function(evt) { self.OnMessage(evt) }
 	this.ws.onerror = function(evt) { self.OnError(evt) }
 	this.ws.onclose = function(evt) { self.OnClose(evt) }
-	
-	this.connected = false
 }

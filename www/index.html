@@ -12,9 +12,12 @@
 	</head>
 
 	<body>
-		<script src="ui.js"></script>
 		<script src="irc.js">
-			var _irc		
+			var _irc	
+			document.addEventListener("DOMContentLoaded", function(){
+				_irc = new IRC()
+				_irc.Init();
+			});	
 		</script>
 
 		<div id="serverlist"></div>
@@ -23,13 +26,5 @@
 			<input type="text" id="ch"/>
 			<input type="button" onclick="_irc.Chat()" value="Send"/>
 		<div>
-		<script>
-			document.addEventListener("DOMContentLoaded", function(){
-				_irc = new IRC()
-				_irc.Init();
-			});
-		</script>
-		
-		
 	</body>
 </html>

@@ -85,6 +85,19 @@ func (c *WSClient) RemoveClient(i *IrcClient) {
 	}
 }
 
+func (c *WSClient) SendStatusMessage(tpe, code int, msg string) {
+	stid := int32(3)
+	st := &Command{
+		Id: &stid,
+		StatusMessage: &StatusMessage{
+			Statuscode: &code,
+			Msgtype:    &tpe,
+			Msg:        &msg,
+		},
+	}
+	c.SendMessage(st)
+}
+
 func (c *WSClient) SendMessage(cmd *Command) {
 	msg, pe := proto.Marshal(cmd)
 	if pe == nil {
