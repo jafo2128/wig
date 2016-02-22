@@ -118,8 +118,16 @@ IRC.prototype.ParseLine= function(server, line) {
 	}
 }
 
+IRC.prototype.StartSession = function(){
+	if(window.localStorage.session === undefined){
+		window.localStorage.session = "";
+	}
+	this.Handshake(window.localStorage.session, null, null)
+}
+
 IRC.prototype.OnOpen = function(evt) {
-	this.Connect()
+	this.StartSession();
+	
 }
 
 IRC.prototype.OnPrivmsg = function(server, msg){
@@ -150,9 +158,17 @@ IRC.prototype.OnMessage = function(evt) {
 					}
 					break
 				}
+				case 1: {
+					if(msg.statusMessage.statuscode == 2){
+						window.localStorage.session = msg.statusMessage.msg
+						console.log("New session started: " + msg.statusMessage.msg)
+					}
+					break
+				}
 			}
 			break
 		}
+		
 	}
 }
 
@@ -188,6 +204,11 @@ IRC.prototype.Chat = function() {
 	var dv = document.querySelector("#ch")
 
 	this.SendMessage(server, dv.value + "\n")
+}
+
+IRC.prototype.Handshake = function(ses, u, p){
+	var msg = new this.Proto.Command({id: 4, handshake: {sessionid: ses, username: u, password: p}})
+	this.ws.send(msg.toArrayBuffer())
 }
 
 IRC.prototype.SendMessage = function(server, msg){

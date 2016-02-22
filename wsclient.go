@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
+	"github.com/satori/go.uuid"
 )
 
 const (
@@ -18,6 +19,7 @@ var upgrader = websocket.Upgrader{
 }
 
 type WSClient struct {
+	uid  uuid.UUID
 	cons map[string]*IrcClient
 	ws   *websocket.Conn
 }
@@ -54,19 +56,35 @@ func (c *WSClient) HandleCommand(cmd *Command) {
 			}
 			break
 		}
+	case 3:
+		{
+			break
+		}
+	case 4:
+		{
+			if cmd.Handshake.GetSessionid() != "" && !_settings.AnonAuth {
+				if _clients[cmd.Handshake.GetSessionid()] != nil {
+					c.SendStatusMessage(1, 2, cmd.Handshake.GetSessionid())
+				} else {
+					c.SendStatusMessage(1, 0, "Session id invalid")
+				}
+			} else if _settings.AnonAuth {
+				u1 := uuid.NewV4()
+				c.uid = u1
+				_clients[u1.String()] = c
+				c.SendStatusMessage(1, 2, u1.String())
+			} else {
+				c.SendStatusMessage(1, 1, "")
+			}
+
+			fmt.Printf("Clients: %v\n", len(_clients))
+			break
+		}
 	default:
 		{
-			stid := int32(3)
 			msgtype := int32(0)
 			rspm := fmt.Sprintf("Unknown command type: %v", *cmd.Id)
-			rsp := &Command{
-				Id: &stid,
-				StatusMessage: &StatusMessage{
-					Msg:     &rspm,
-					Msgtype: &msgtype,
-				},
-			}
-			c.SendMessage(rsp)
+			c.SendStatusMessage(msgtype, 0, rspm)
 		}
 	}
 }
@@ -75,6 +93,10 @@ func (c *WSClient) Shutdown() {
 	c.ws.Close()
 	for _, v := range c.cons {
 		v.Close()
+	}
+
+	if _clients[c.uid.String()] != nil {
+		delete(_clients, c.uid.String())
 	}
 }
 
@@ -85,7 +107,7 @@ func (c *WSClient) RemoveClient(i *IrcClient) {
 	}
 }
 
-func (c *WSClient) SendStatusMessage(tpe, code int, msg string) {
+func (c *WSClient) SendStatusMessage(tpe, code int32, msg string) {
 	stid := int32(3)
 	st := &Command{
 		Id: &stid,

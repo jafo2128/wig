@@ -5,6 +5,7 @@ message Command {
 	optional ConnectCommand connectCommand = 2;
 	optional ServerMessage serverMessage = 3;
 	optional StatusMessage statusMessage = 4;
+	optional Handshake handshake = 5;
 }
 
 message ConnectCommand {
@@ -25,8 +26,8 @@ message StatusMessage {
 	optional int32 statuscode = 3;
 }
 
-message Login {
-	required string username = 1;
-	required string password = 2;
-	optional bool newUser = 3;
+message Handshake {
+	required string sessionid = 1;
+	optional string username = 2;
+	optional string password = 3;
 }

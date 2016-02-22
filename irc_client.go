@@ -32,15 +32,7 @@ func (i *IrcClient) Run() {
 
 			stid := int32(3)
 			stc := int32(1)
-			fwm := &Command{
-				Id: &stid,
-				StatusMessage: &StatusMessage{
-					Statuscode: &stc,
-					Msgtype:    &stid,
-					Msg:        &i.config.server,
-				},
-			}
-			i.cli.SendMessage(fwm)
+			i.cli.SendStatusMessage(stid, stc, i.config.server)
 
 			i.io = bufio.NewReadWriter(bufio.NewReader(i.conn_tls), bufio.NewWriter(i.conn_tls))
 			go func() {
@@ -59,17 +51,9 @@ func (i *IrcClient) Run() {
 						i.cli.SendMessage(fwm)
 					} else {
 						fmt.Println("Read error:", rer.Error())
-						stid := int32(3)
+
 						stc := int32(2)
-						fwm := &Command{
-							Id: &stid,
-							StatusMessage: &StatusMessage{
-								Statuscode: &stc,
-								Msgtype:    &stid,
-								Msg:        &i.config.server,
-							},
-						}
-						i.cli.SendMessage(fwm)
+						i.cli.SendStatusMessage(stid, stc, i.config.server)
 						break
 					}
 				}

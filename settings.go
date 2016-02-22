@@ -11,6 +11,7 @@ type Settings struct {
 	SslCert     string `json:sslcert`
 	SslKey      string `json:sslkey`
 	AutoGenCert bool   `json:autogencert`
+	AnonAuth    bool   `json:anonauth`
 }
 
 var _cfg_file = "options.json"
@@ -30,6 +31,7 @@ func LoadSettings() *Settings {
 			AutoGenCert: true,
 			SslCert:     "cert.crt",
 			SslKey:      "cert.key",
+			AnonAuth:    true,
 		}
 		js, jer := json.MarshalIndent(ret, "\t", "")
 		if jer == nil {

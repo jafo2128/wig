@@ -7,19 +7,19 @@
 		<title>Wig</title>
 		
 		<link rel="stylesheet" href="main.css"/>
-		<script src="https://cdn.rawgit.com/dcodeIO/bytebuffer.js/5.0.1/dist/bytebuffer.js"></script>
-		<script src="https://cdn.rawgit.com/dcodeIO/protobuf.js/5.0.1/dist/protobuf.js"></script>
+		<script src="bytebuffer.js"></script>
+		<script src="protobuf.js"></script>
 	</head>
 
 	<body>
-		<script src="irc.js">
+		<script src="irc.js"></script>
+		<script>
 			var _irc	
 			document.addEventListener("DOMContentLoaded", function(){
 				_irc = new IRC()
 				_irc.Init();
 			});	
 		</script>
-
 		<div id="serverlist"></div>
 		<div id="chat"></div>
 		<div id="chatInput">
